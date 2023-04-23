@@ -1,16 +1,34 @@
 import gymnasium as gym
-from genetic_functions import test
+import numpy as np
 
-env = gym.make("ALE/Pacman-ram-v5", render_mode="human")
+from agent import Agent
+from brain import Brain
+from population import Population
+pop = 3
+env = gym.make("ALE/MsPacman-ram-v5", render_mode="human")
+obs_space = env.observation_space
+print("The observation space: {}".format(obs_space))
 
 env.reset()
-for _ in range(10000):
+
+# test = Population(env)
+# test.createPop(pop)
+# test.runGeneration()
+
+# for i in range(pop):
+#     print(test.agents[i].fitnessPrint())
+    
+
+for i in range(10000):
+    #print(i)
     action = env.action_space.sample()  # this is where you would insert your policy
+
     observation, reward, terminated, truncated, info = env.step(action)
-
-    print(info)
-
+    #print(observation)
+    #print(reward)
 
     if terminated or truncated:
         observation, info = env.reset()
+        print(observation)
+        break
 env.close()
