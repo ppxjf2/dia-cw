@@ -6,7 +6,7 @@ from brain import Brain
 from population import Population
 pop = 3
 env = gym.make("ALE/MsPacman-ram-v5", render_mode="human")
-obs_space = env.observation_space
+obs_space = env.observation_space.shape[0]
 print("The observation space: {}".format(obs_space))
 
 env.reset()

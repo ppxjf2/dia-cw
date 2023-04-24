@@ -9,6 +9,7 @@ class Population:
         self.generation = 1
         self.env = env
         self.generation = 0
+        self.fitsum = 0
 
             
     def createPop(self, size):
@@ -36,18 +37,23 @@ class Population:
                 #self.env.close()
             self.agents[i].fitnessValue(fitness)
             
-    def naturalSelection(self):
-        
-        pass
+
     
     def selectParent(self):
         
-        return  
+        return 
+    
+    def naturalSelection(self):
+        parent = self.selectParent()
+        
+        pass
     
     def mutateChildren(self):
+        
         pass
     
     def setBestAgent(self):
+        
         pass
     
     
