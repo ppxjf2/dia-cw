@@ -2,20 +2,18 @@ from brain import Brain
 
 class Agent:
     
-    def __init__(self):
-        self.brain = Brain(1000)
+    def __init__(self, frames):
+        self.frames = frames
+        self.brain = Brain(frames)
         self.fitness = 0 
-        self.isBest = False
 
     def fitnessValue(self, fitness):
         self.fitness = fitness
         
-        
-    def fitnessPrint(self):
-        return self.fitness
-
-
-    def gimmeBaby(self): 
-        baby = Agent()
-        baby.brain = self.brain.clone()
-        return baby
+    def createChild(self): 
+        child = Agent(self.frames)
+        child.brain = self.brain.clone()
+        return child
+    
+    def setBrain(self, brain):
+        self.brain = brain

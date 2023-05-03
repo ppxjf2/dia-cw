@@ -7,16 +7,18 @@ class Brain:
     actions = []
     step = 0
 
-    def __init__(self, size):        
+    def __init__(self, size):
+        self.actions = []   
+        self.size = size     
         for i in range(size):
-            self.actions.append(random.randint(0, 8))
+            self.actions.append(random.randint(0, 4))
 
     # returns a copy of the brain, this does not hurt the brain
     def clone(self):
-        clone = Brain()
+        clone = Brain(self.size)
         
         for i in range(len(self.actions)):
-            clone.actions.append(self.actions[i])
+            clone.actions[i] = self.actions[i]
         
         return clone
     
@@ -25,8 +27,11 @@ class Brain:
         mutationRate = 0.01
         
         for i in range(len(self.actions)):
-            rand = random.random()
+            rng = random.random()
             
-            if (rand < mutationRate):
-                # random direction 
-                self.actions[i] = random.randint(0, 8)
+            if (rng < mutationRate):
+                # random direction  
+                self.actions[i] = random.randint(0, 4)
+                
+    def loadBrain(self, actions):
+        self.actions = actions
