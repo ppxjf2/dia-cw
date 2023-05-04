@@ -63,9 +63,9 @@ action = np.loadtxt("best_brain.txt", dtype="uint8", delimiter=' ')
 rewardSum = 0
 lastObservation = []
 
-for i in range(82):
+for i in range(100):
     #print(i)
-    #action = env.action_space.sample()  # this is where you would insert your policy
+    # action = env.action_space.sample()  # this is where you would insert your policy
 
     observation, reward, terminated, truncated, info = env.step(3)
     np.set_printoptions(threshold=np.inf)
@@ -75,7 +75,7 @@ for i in range(82):
         print(observation)
         lastObservation = observation
         
-    np.savetxt("observations/observation.txt", observation, fmt="%d")
+    np.savetxt("observations/observation" + str(i) + ".txt", observation, fmt="%d")
     rewardSum += reward
 
     if terminated or truncated:

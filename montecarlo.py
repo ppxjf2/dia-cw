@@ -12,7 +12,7 @@ class MonteCarlo:
 
     def __init__(self):
         self.G = []
-        values= np.random.random([0,pos_actions]); 
+        values= np.random.random([255,pos_actions]); 
         self.value_function = values
         self.steps
 
@@ -42,9 +42,8 @@ class MonteCarlo:
         return
 
     def train(self):
-        """A self contained method designed to train parameters created in the initialiser."""
         self.values= np.random.random([20,40,30,10,pos_actions]); 
-        #self.values+= 100000
+        
         epochs = 5000
         average_returns = np.empty([20,40,30,10,pos_actions])
         average_returns_count = np.zeros([20,40,30,10,pos_actions])
@@ -68,9 +67,9 @@ class MonteCarlo:
             self.counter = 1
 
             # 3) run simulation
-            for j in range(self.frames):
+            for j in range(self.steps):
 
-                action = action_sele
+                # action = 
 
                 observation, reward, terminated, truncated, info = self.env.step(action)
 
@@ -97,7 +96,7 @@ class MonteCarlo:
             G = 0
             # 5) update parameters according to algorithm
             for i in reversed(range(len(actions))):
-                k= len(actions)-1
+                k = len(actions)-1
                 total_new_rewardsblip
                 G = np.average(rewards[(k-i):])
 
