@@ -2,6 +2,7 @@ from agent import Agent
 from brain import Brain
 import gymnasium as gym
 import random
+import math
 
 class Population:
     
@@ -52,7 +53,7 @@ class Population:
             sum += self.agents[i].fitness
         return sum
 
-    def newPrent(self, fitnessSum):
+    def rouletteWheelParentSelection(self, fitnessSum):
         rng = random.randint(0, fitnessSum)
 
         currentVal = 0
@@ -75,6 +76,20 @@ class Population:
                 
         return bestAgentIndex
     
+    def geneCombination(self, childA, childB):
+        rng = random.uniform(0.6, 1.9)
+        crossover = math.floor(len(childA.brain.actions) * rng)
+        tempRight = childA.brain.actions[crossover:]
+        tempLeft = childA.brain.actions[:crossover]
+        
+        childA.brain.actions[crossover:] = childB.brain.actions[crossover:]
+        childA.brain.actions[:crossover] = childB.brain.actions[:crossover]
+        
+        childB.brain.actions[crossover:] = tempRight
+        childB.brain.actions[:crossover] = tempLeft
+                
+        return childA, childB
+    
     def naturalSelection(self,size):
         bestAgentIndex = 0
        
@@ -88,9 +103,15 @@ class Population:
         children[0] = self.agents[bestAgentIndex].createChild()
         children[1] = self.agents[bestAgentIndex].createChild()
         
+        # New generation
         for i in range(2, len(self.agents)):
-            parent = self.newPrent(fitnessSum)
+            parent = self.rouletteWheelParentSelection(fitnessSum)
             children[i] = parent.createChild()
+            
+        # Genome Crossover
+        for i in range(2, len(self.agents),2):
+            if(i+1 < len(self.agents)):
+                children[i], children[i+1] = self.geneCombination(children[i], children[i+1])
     
         self.agents = children
     

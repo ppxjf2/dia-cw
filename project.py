@@ -34,7 +34,7 @@ gen = 1000
 #         agents.append(test.agents[j].brain.actions)
 #         #print(test.agents[j].brain.actions)
     
-#     np.savetxt("generations/generation_" + str(i+1) + ".txt", fmt="%d", agents)
+#     np.savetxt("generations/generation_" + str(i+1) + ".txt", agents, fmt="%d")
     
 #     test.naturalSelection(pop)
 #     test.mutateChildren()
@@ -63,19 +63,19 @@ action = np.loadtxt("best_brain.txt", dtype="uint8", delimiter=' ')
 rewardSum = 0
 lastObservation = []
 
-for i in range(20000):
+for i in range(82):
     #print(i)
     #action = env.action_space.sample()  # this is where you would insert your policy
 
-    observation, reward, terminated, truncated, info = env.step(action[i])
-    #np.set_printoptions(threshold=np.inf)
-    #observation = observation.reshape(observation.shape[0], -1)
+    observation, reward, terminated, truncated, info = env.step(3)
+    np.set_printoptions(threshold=np.inf)
+    observation = observation.reshape(observation.shape[0], -1)
     
     if(np.array_equal(observation, lastObservation)):
         print(observation)
         lastObservation = observation
         
-    np.savetxt("observation.txt", observation, fmt="%d")
+    np.savetxt("observations/observation.txt", observation, fmt="%d")
     rewardSum += reward
 
     if terminated or truncated:
