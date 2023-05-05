@@ -1,5 +1,7 @@
 import gymnasium as gym
 import numpy as np
+import pandas as pd 
+import csv
 
 from agent import Agent
 from brain import Brain
@@ -54,7 +56,7 @@ gen = 1000
 # for j in range(pop):
 #     print(test.agents[j].fitness)
 
-env = gym.make("MsPacmanDeterministic-v4", render_mode="human", obs_type="ram")
+env = gym.make("MsPacman-ramDeterministic-v4", render_mode="human", obs_type="ram")
 env.reset()
 
 
@@ -63,19 +65,24 @@ action = np.loadtxt("best_brain.txt", dtype="uint8", delimiter=' ')
 rewardSum = 0
 lastObservation = []
 
-for i in range(100):
+for i in range(79):
     #print(i)
     # action = env.action_space.sample()  # this is where you would insert your policy
 
     observation, reward, terminated, truncated, info = env.step(3)
     np.set_printoptions(threshold=np.inf)
     observation = observation.reshape(observation.shape[0], -1)
-    
-    if(np.array_equal(observation, lastObservation)):
-        print(observation)
-        lastObservation = observation
+
+    # if(np.array_equal(observation, lastObservation)):
+    #     print(observation)
+    #     lastObservation = observation
         
-    np.savetxt("observations/observation" + str(i) + ".txt", observation, fmt="%d")
+    #np.savetxt("observations/observation" + str(i) + ".txt", observation, fmt="%d")
+    if(i > 60):
+        data_new = pd.read_csv('observation.csv')
+        data_new['observation' + str(i)] = observation
+        data_new.to_csv('observation.csv', index=False)
+    
     rewardSum += reward
 
     if terminated or truncated:
