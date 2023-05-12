@@ -2,7 +2,7 @@ import datetime
 from math import floor, log
 from typing import Tuple
 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
@@ -11,12 +11,26 @@ pos_actions=5
 class MonteCarlo:
 
     def __init__(self):
+        self.pacman_x = 0
+        self.pacman_y = 0
+        self.red_x = 0
+        self.red_y = 0
+        self.orange_x = 0
+        self.orange_y = 0
+        self.blue_x = 0
+        self.blue_y = 0
+        self.pink_x = 0
+        self.pink_y = 0
+        self.cherry_x = 0
+        self.cherry_y = 0
         self.G = []
-        values= np.random.random([255,pos_actions]); 
+        
+        # values= np.random.random([,pos_actions]) 
         self.value_function = values
         self.steps
         
-        self.map = self.mapGen()
+        self.pillMap = self.mapGen()
+        self.ghostMap = self.mapGen()
         
     def mapGen(self):
         # board[y][x]
@@ -44,7 +58,9 @@ class MonteCarlo:
 
     def action_selection(self, states):
 
-        
+        self.pacman_x 
+        self.pacman_y
+                
         
         return action
 
@@ -81,10 +97,26 @@ class MonteCarlo:
             # 3) run simulation
             for j in range(self.steps):
 
-                # action = 
+                action = self.action_selection()
 
                 observation, reward, terminated, truncated, info = self.env.step(action)
-
+                
+                self.pacman_x = observation[17]
+                self.pacman_y = observation[17]
+                
+                self.red_x = observation[10]
+                self.red_y = observation[16]
+                self.orange_x = observation[7]
+                self.orange_y = observation[13]
+                self.blue_x = observation[8]
+                self.blue_y = observation[14]
+                self.pink_x = observation[9]
+                self.pink_y = observation[15]
+                self.cherry_x = observation[12]
+                self.cherry_y = observation[18]
+                
+                
+                
                 fitness += reward
 
                 if terminated or truncated:
@@ -133,11 +165,11 @@ class MonteCarlo:
         time = now.strftime(f"Drone-epochs {epochs} %d-%m-%Y_%H-%M-%S")
         df.to_csv(f'{time}.csv')
 
-        plt.figure()
-        plt.plot(total_rewards, label="Sampled Mean Return", alpha=1)
-        plt.xlabel("Epochs")
-        plt.ylabel("Avg Return")
-        plt.show()
+        # plt.figure()
+        # plt.plot(total_rewards, label="Sampled Mean Return", alpha=1)
+        # plt.xlabel("Epochs")
+        # plt.ylabel("Avg Return")
+        # plt.show()
         
 
     def load(self):

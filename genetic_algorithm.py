@@ -6,7 +6,7 @@ import csv
 from agent import Agent
 from brain import Brain
 from population import Population
-# from montecarlo import MonteCarlo
+from monte_carlo import MonteCarlo
 
 pop = 50
 gen = 1000
@@ -56,11 +56,13 @@ gen = 1000
 # for j in range(pop):
 #     print(test.agents[j].fitness)
 
-env = gym.make("MsPacman-ramDeterministic-v4", render_mode="human", obs_type="rgb")
+env = gym.make("MsPacman-ramDeterministic-v4", render_mode="human", obs_type="ram")
 env.reset()
 
 
 action = np.loadtxt("best_brain.txt", dtype="uint8", delimiter=' ')
+
+
 
 rewardSum = 0
 lastObservation = []
