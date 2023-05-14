@@ -1,6 +1,7 @@
 import datetime
-from math import floor, log
+import math
 from typing import Tuple
+
 
 # import matplotlib.pyplot as plt
 import numpy as np
@@ -10,34 +11,44 @@ pos_actions=5
 
 class MonteCarlo:
 
-    def __init__(self):
+    def __init__(self, env):
         self.pacman_x = 0
         self.pacman_y = 0
-        self.red_x = 0
-        self.red_y = 0
+        
         self.orange_x = 0
-        self.orange_y = 0
         self.blue_x = 0
-        self.blue_y = 0
         self.pink_x = 0
+        self.red_x = 0
+        
+        self.orange_y = 0
+        self.blue_y = 0
         self.pink_y = 0
+        self.red_y = 0
+        
         self.cherry_x = 0
         self.cherry_y = 0
+        
         self.G = []
+        self.env = env
         
         # values= np.random.random([,pos_actions]) 
-        self.value_function = values
-        self.steps
+        # self.value_function = values
+        # self.steps
         
-        self.pillMap = self.mapGen()
+        # 12y 8x is one map square 
+        self.defaultMap = self.mapGen()
+        self.pillMap = self.pillGen()
         self.ghostMap = self.mapGen()
         
     def mapGen(self):
         # board[y][x]
         board = np.loadtxt("small_map_test.txt", dtype="uint8", delimiter=' ')
-        
         return board
         
+    def pillGen(self):
+        # board[y][x]
+        board = np.loadtxt("pill_map.txt", dtype="uint8", delimiter=' ')
+        return board
 
     def value_calc(self, state):
         
@@ -51,39 +62,123 @@ class MonteCarlo:
                     i=n
             return i
 
-    def reward(self):
-        reward = 0
+    def reward(self, score):
+        
+        # negative if ghosts too close
+        # negative on death
+        # 
+        
+        
+        reward = ghost_distance
+        
+        
+        
         return reward
     
+    def ghostMapReset(self):
+        # orange 3, blue 4, pink 5, red 6
+        self.ghostMap = self.defaultMap
+        
+        self.ghostMap[self.orange_y][self.orange_x] = 3
+        self.ghostMap[self.blue_y][self.blue_x] = 4
+        self.ghostMap[self.pink_y][self.pink_x] = 5
+        self.ghostMap[self.red_y][self.red_x] = 6
+        
+    def closestGhost(self):
+        
+        x = 0
+        y = 0
+        
+        return x, y
+         
 
-    def action_selection(self, states):
+    def action_selection(self, states, action):
+        
+        ghost_x, ghost_y = self.closestGhost()
+        
+        state = (
+            int(self.pacman_x),
+            int(self.pacman_y),
+            int(),
+            int()
+        )
+        self.states.append(state)
+        
+        # Action
+        self.action = self.value_calc(state)
+        self.actions.append(self.action)
 
-        self.pacman_x 
-        self.pacman_y
-                
+        # Reward
+        reward = self.reward()
+        self.rewards.append(reward)
+
+
+        up = self.defaultMap[self.pacman_y-1][self.pacman_x]
+        down = self.defaultMap[self.pacman_y+1][self.pacman_x]
+        left = self.defaultMap[self.pacman_y][self.pacman_x-1]
+        right = self.defaultMap[self.pacman_y][self.pacman_x+1]
+
+        if(action == 0):
+            # run from ghosts
+        
+            # if(self.ghost):
+        
+        
+            # if(up == 0):
+            
+            
+            
+            return 1
+        
+        elif(action == 1):
+            # collect pills
+            
+            return 1
+        
+        elif(action == 2):
+            # chase blue ghosts 
+            
+            return 1
+
+        
         
         return action
-
-    def behaviour(self):
+    
+    def setCoordinates(self, observation):
+        self.pacman_x = math.floor((observation[10]+2)/8)-1
+        self.pacman_y = math.floor((observation[16]+10)/12)
         
-            
-        return
-
-    def train(self):
-        self.values= np.random.random([20,40,30,10,pos_actions]); 
+        self.orange_x = math.floor((observation[6]+2)/8)-1
+        self.blue_x = math.floor((observation[7]+2)/8)-1
+        self.pink_x = math.floor((observation[8]+2)/8)-1
+        self.red_x = math.floor((observation[9]+2)/8)-1
         
-        epochs = 1
-        average_returns = np.empty([20,40,30,10,pos_actions])
-        average_returns_count = np.zeros([20,40,30,10,pos_actions])
-        Q = np.empty([20,40,30,10,pos_actions])
+        self.orange_y = math.floor((observation[12]+10)/12)
+        self.blue_y = math.floor((observation[13]+10)/12)
+        self.pink_y = math.floor((observation[14]+10)/12)
+        self.red_y = math.floor((observation[15]+10)/12)
+        
+        self.cherry_x = math.floor((observation[11]+2)/8)-1
+        self.cherry_y = math.floor((observation[17]+10)/12)
+        
 
-        total_rewards = []
-        total_targets = []
+    def train(self, epochs):
+        # self.values= np.random.random([20,40,30,10,pos_actions]); 
+        
+        # average_returns = np.empty([20,40,30,10,pos_actions])
+        # average_returns_count = np.zeros([20,40,30,10,pos_actions])
+        # Q = np.empty([20,40,30,10,pos_actions])
+
+        # total_rewards = []
+        # total_targets = []
 
 
 
         # --- Code snipped provided for guidance only --- #
         for n in range(epochs):
+            
+            self.env.reset()
+            
             # 1) modify parameters
             self.states = []
             self.actions = []
@@ -98,83 +193,56 @@ class MonteCarlo:
             for j in range(self.steps):
 
                 action = self.action_selection()
-
+                
                 observation, reward, terminated, truncated, info = self.env.step(action)
-                
-                self.pacman_x = observation[17]
-                self.pacman_y = observation[17]
-                
-                self.red_x = observation[10]
-                self.red_y = observation[16]
-                self.orange_x = observation[7]
-                self.orange_y = observation[13]
-                self.blue_x = observation[8]
-                self.blue_y = observation[14]
-                self.pink_x = observation[9]
-                self.pink_y = observation[15]
-                self.cherry_x = observation[12]
-                self.cherry_y = observation[18]
+                self.setCoordinates(observation)
                 
                 
+                
+                self.pillMap[self.pacman_y][self.pacman_x] = 0
                 
                 fitness += reward
 
                 if terminated or truncated:
                     observation, info = self.env.reset()
-                    break
-                #self.env.close()
+                    break            
+                
+                
+                
             
+            # for t in range(self.get_max_simulation_steps()):
+            #     drone.set_thrust(self.get_thrusts(drone))
+            #     drone.step_simulation(self.get_time_interval())
             
-            for t in range(self.get_max_simulation_steps()):
-                drone.set_thrust(self.get_thrusts(drone))
-                drone.step_simulation(self.get_time_interval())
-            
-            states, actions, rewards = self.states, self.actions, self.rewards
+            # states, actions, rewards = self.states, self.actions, self.rewards
 
-            # 4) measure change in quality
-            total_new_rewardsblip = np.sum(rewards)
-            print(n, total_new_rewardsblip,self.counter)
-            total_rewards.append(total_new_rewardsblip)
-            total_targets.append(self.counter)
+            # # 4) measure change in quality
+            # total_new_rewardsblip = np.sum(rewards)
+            # print(n, total_new_rewardsblip,self.counter)
+            # total_rewards.append(total_new_rewardsblip)
+            # total_targets.append(self.counter)
 
-            G = 0
-            # 5) update parameters according to algorithm
-            for i in reversed(range(len(actions))):
-                k = len(actions)-1
-                total_new_rewardsblip
-                G = np.average(rewards[(k-i):])
+            # G = 0
+            # # 5) update parameters according to algorithm
+            # for i in reversed(range(len(actions))):
+            #     k = len(actions)-1
+            #     total_new_rewardsblip
+            #     G = np.average(rewards[(k-i):])
 
-                cur_reward = self.value_function[states[k-i][0]][states[k-i][1]][states[k-i][2]][states[k-i][3]][actions[k-i]]
+            #     cur_reward = self.value_function[states[k-i][0]][states[k-i][1]][states[k-i][2]][states[k-i][3]][actions[k-i]]
 
-                average_returns[states[k-i][0]][states[k-i][1]][states[k-i][2]][states[k-i][3]][actions[k-i]] += G
-                average_returns_count[states[k-i][0]][states[k-i][1]][states[k-i][2]][states[k-i][3]][actions[k-i]] += 1
+            #     average_returns[states[k-i][0]][states[k-i][1]][states[k-i][2]][states[k-i][3]][actions[k-i]] += G
+            #     average_returns_count[states[k-i][0]][states[k-i][1]][states[k-i][2]][states[k-i][3]][actions[k-i]] += 1
 
-                Q[states[k-i][0]][states[k-i][1]][states[k-i][2]][states[k-i][3]][actions[k-i]] = average_returns[states[k-i][0]][states[k-i][1]][states[k-i][2]][states[k-i][3]][actions[k-i]] / average_returns_count[states[k-i][0]][states[k-i][1]][states[k-i][2]][states[k-i][3]][actions[k-i]]
+            #     Q[states[k-i][0]][states[k-i][1]][states[k-i][2]][states[k-i][3]][actions[k-i]] = average_returns[states[k-i][0]][states[k-i][1]][states[k-i][2]][states[k-i][3]][actions[k-i]] / average_returns_count[states[k-i][0]][states[k-i][1]][states[k-i][2]][states[k-i][3]][actions[k-i]]
 
 
-                self.value_function[states[k-i][0]][states[k-i][1]][states[k-i][2]][states[k-i][3]][actions[k-i]] = Q[states[k-i][0]][states[k-i][1]][states[k-i][2]][states[k-i][3]][actions[k-i]]
+            #     self.value_function[states[k-i][0]][states[k-i][1]][states[k-i][2]][states[k-i][3]][actions[k-i]] = Q[states[k-i][0]][states[k-i][1]][states[k-i][2]][states[k-i][3]][actions[k-i]]
 
         pass
-
-        from datetime import datetime
-        import csv
-
-        variablename = {"total_reward":total_rewards, "targets_hit":total_targets}
-        df = pd.DataFrame(variablename)
-        now = datetime.now()
-        time = now.strftime(f"Drone-epochs {epochs} %d-%m-%Y_%H-%M-%S")
-        df.to_csv(f'{time}.csv')
-
-        # plt.figure()
-        # plt.plot(total_rewards, label="Sampled Mean Return", alpha=1)
-        # plt.xlabel("Epochs")
-        # plt.ylabel("Avg Return")
-        # plt.show()
         
 
     def load(self):
-        """Load the parameters of this flight controller from disk.
-        """
         try:
             parameter_array = np.load('pacman_controller_parameters.npy')
             self.value_function = parameter_array[0]
@@ -183,7 +251,5 @@ class MonteCarlo:
             print("Could not load parameters, sticking with default parameters.")
 
     def save(self):
-        """Save the parameters of this flight controller to disk.
-        """
         parameter_array = np.array([self.value_function])
         np.save('pacman_controller_parameters.npy', parameter_array)

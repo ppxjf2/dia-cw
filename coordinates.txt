@@ -5,13 +5,12 @@
 32
 37
 
-
 green - Moving right/Moving down
 orange - Moving left/moving up
 
 left up left up right down right down
 
-1 - 
+In Excel
 2 - 
 3 - 
 4 - 
