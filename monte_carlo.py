@@ -11,7 +11,7 @@ pos_actions=5
 
 class MonteCarlo:
 
-    def __init__(self, env):
+    def __init__(self, env):        
         self.pacman_x = 0
         self.pacman_y = 0
         
@@ -40,6 +40,35 @@ class MonteCarlo:
         self.pillMap = self.pillGen()
         self.ghostMap = self.mapGen()
         
+        self.graph = self.graphGen()
+        
+    def graphGen(self):
+        graph = {}
+
+        for y in range(1, 15):
+            for x in range(1, 20):
+                coord = []
+                # print("(" + str(y) + "," + str(x) + ")")
+                for dy, dx in [(-1, 0), (0, +1), (+1, 0), (0, -1)]:
+                    a, b = y + dy, x + dx
+                    if(self.defaultMap[a][b] != 1):
+                        coord.append((a,b))                            
+                    
+                graph[(y,x)] = coord
+                # print( str(y) + ", " + str(x) + " : " + str(coord))
+        # print(graph[(3,4)])
+        
+        graph[(5,0)] = [(5,1),(5,20)]
+        graph[(9,0)] = [(9,1),(9,20)]
+        
+        graph[(5,20)] = [(5,1),(5,0)]
+        graph[(9,20)] = [(9,1),(9,0)]
+        
+        # for each in graph:
+        #     print(each)
+        
+        return graph
+        
     def mapGen(self):
         # board[y][x]
         board = np.loadtxt("small_map_test.txt", dtype="uint8", delimiter=' ')
@@ -63,15 +92,10 @@ class MonteCarlo:
             return i
 
     def reward(self, score):
-        
         # negative if ghosts too close
         # negative on death
-        # 
-        
-        
-        reward = ghost_distance
-        
-        
+               
+        reward = ghost_distance + score       
         
         return reward
     
@@ -79,18 +103,45 @@ class MonteCarlo:
         # orange 3, blue 4, pink 5, red 6
         self.ghostMap = self.defaultMap
         
+        
         self.ghostMap[self.orange_y][self.orange_x] = 3
         self.ghostMap[self.blue_y][self.blue_x] = 4
         self.ghostMap[self.pink_y][self.pink_x] = 5
         self.ghostMap[self.red_y][self.red_x] = 6
         
     def closestGhost(self):
+
+        visited = [] # List for visited nodes.
+        self.queue = []     #Initialize a queue
+        
+        self.bfs(visited, self.graph, )        
+        
         
         x = 0
         y = 0
         
-        return x, y
-         
+        return x, y             
+
+    # found solution for returning path from stack overflow answered by SeasonalShot
+    # https://stackoverflow.com/questions/8922060/how-to-trace-the-path-in-a-breadth-first-search
+    def bfs(self, graph, start):
+        
+        queue = [(start,[start])]
+        visited = set()
+    
+        while queue:
+            vertex, path = queue.pop(0)
+            visited.add(vertex)
+            
+            for node in graph[vertex]:
+                if(self.ghostMap[node[0]][node[1]] != 0):
+                    return path + [node]
+                else:
+                    if node not in visited:
+                        visited.add(node)
+                        queue.append((node, path + [node]))
+                        
+    
 
     def action_selection(self, states, action):
         
@@ -169,7 +220,7 @@ class MonteCarlo:
         # average_returns_count = np.zeros([20,40,30,10,pos_actions])
         # Q = np.empty([20,40,30,10,pos_actions])
 
-        # total_rewards = []
+        total_rewards = []
         # total_targets = []
 
 
@@ -196,10 +247,8 @@ class MonteCarlo:
                 
                 observation, reward, terminated, truncated, info = self.env.step(action)
                 self.setCoordinates(observation)
-                
-                
-                
-                self.pillMap[self.pacman_y][self.pacman_x] = 0
+                               
+                self.pillMap[self.pacman_y][self.pacman_x] = 2
                 
                 fitness += reward
 
