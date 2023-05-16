@@ -8,6 +8,9 @@ from brain import Brain
 from population import Population
 from monte_carlo import MonteCarlo
 
+import matplotlib.pyplot as plt
+
+
 pop = 50
 gen = 1000
 
@@ -56,16 +59,15 @@ gen = 1000
 # for j in range(pop):
 #     print(test.agents[j].fitness)
 
-env = gym.make("MsPacman-ramDeterministic-v4", render_mode="human", obs_type="ram")
+env = gym.make("MsPacman-ramDeterministic-v4", render_mode="rgb_array", obs_type="ram")
 env.reset()
 
 
 action = np.loadtxt("best_brain.txt", dtype="uint8", delimiter=' ')
 
-
-
 rewardSum = 0
 lastObservation = []
+graphScore = []
 
 # movement starts at 66 frames
 for i in range(20000):
@@ -82,11 +84,35 @@ for i in range(20000):
     # f.close()
 
     rewardSum += reward
+    
+    graphScore.append(rewardSum)
 
     if terminated or truncated:
         observation, info = env.reset()
+        print("Survived: " + str(i))
         # print(observation)
         break   
 
 # print(rewardSum)
 env.close()
+
+# np.savetxt("GAScore.txt", graphScore, fmt="%d")
+
+df = pd.DataFrame(graphScore)
+df.to_csv("GAScore.csv", index=False)
+# GAScore = pd.read_csv("GAScore.csv")
+MCScore = pd.read_csv("MCScore.csv")
+# # MCPillScore = pd.read_csv("MCPillScore.csv")
+# # MCGhostScore = pd.read_csv("MCGhostScore.csv")
+
+print(MCScore.iloc[-1])
+
+# plt.figure()
+# plt.plot(GAScore, label="Score at each time step", alpha=1)
+# # plt.plot(MCScore, label="Score at each tim step", alpha=1)
+# # plt.plot(MCPillScore, label="Score at each tim step", alpha=1)
+# # plt.plot(MCGhostScore, label="Score at each tim step", alpha=1)
+# plt.xlabel("Time Step")
+# plt.ylabel("Score")
+# plt.legend(["Genetic Algorithm"])
+# plt.show()

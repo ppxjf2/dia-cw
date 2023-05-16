@@ -1,6 +1,8 @@
 import datetime
 import math
 from typing import Tuple
+import matplotlib.pyplot as plt
+
 
 
 # import matplotlib.pyplot as plt
@@ -28,11 +30,15 @@ class MonteCarlo:
         self.cherry_x = 0
         self.cherry_y = 0
         
+        
+        self.states = []
+        self.actions = []
+        self.rewards = []
+        
         self.G = []
         self.env = env
-        
+        self.lives = 2
         self.current_action = 3
-        self.counter = 0
         self.action = 0
         self.score = 0
         values = np.random.random([15, 21, 15, 21, pos_actions]) 
@@ -73,6 +79,14 @@ class MonteCarlo:
         graph[(5,20)] = [(5,19)]
         graph[(9,20)] = [(9,19)]
         
+        graph[(5,19)] = [(5,18)]
+        graph[(9,19)] = [(9,18)]
+        
+        graph[(5,1)] = [(5,2)]
+        graph[(9,1)] = [(9,2)]
+        
+        # graph[(9,10)] = [(9,9),(9,11)]
+        
         return graph
         
     def mapGen(self):
@@ -90,9 +104,10 @@ class MonteCarlo:
         board = np.loadtxt("maps/ghost_map.txt", dtype="uint8", delimiter=' ')
         return board
 
+    # This function was used in a prior piece of work for MLiS part 1 
     def value_calc(self, state):
         
-        if (np.random.rand() > 0.99):
+        if (np.random.rand() > 0.98):
             return np.random.randint(pos_actions)
         else:  
             maxValue = max(self.value_function[state[0]][state[1]][state[2]][state[3]])
@@ -102,22 +117,35 @@ class MonteCarlo:
                     i=n
             return i
 
-    def reward(self, state, ghost_dist):
+    def reward(self, ghost_dist):
         # negative if ghosts too close
-        # negative on death
         
-        reward = -ghost_dist + self.score
+        too_close = 0
+        if(ghost_dist < 2):
+            too_close = -500
+        elif(ghost_dist < 3):
+            too_close = -300
+        elif(ghost_dist < 4):
+            too_close = -100
+        
+        
+        life_bonus = self.lives * 10
+        
+        pillsLeft = np.count_nonzero(self.pillMap == 2)*2
+
+        reward = (ghost_dist)*10 + (self.score*50) + too_close - pillsLeft + life_bonus
         
         return reward
     
     def ghostMapReset(self):
         # orange 3, blue 4, pink 5, red 6
-        self.ghostMap = self.defaultMap
+        self.ghostMap = np.loadtxt("maps/ghost_map.txt", dtype="uint8", delimiter=' ')
+
         
         self.ghostMap[self.orange_y][self.orange_x] = 3
         self.ghostMap[self.blue_y][self.blue_x] = 4
         self.ghostMap[self.pink_y][self.pink_x] = 5
-        self.ghostMap[self.red_y][self.red_x] = 6
+        self.ghostMap[self.red_y][self.red_x] = 6        
         
     def closestGhost(self):
         route = self.bfs("ghost", self.graph, (self.pacman_y, self.pacman_x))        
@@ -168,28 +196,41 @@ class MonteCarlo:
         )
         self.states.append(state)
         
-        action = self.action_selection()
         
         # Action
         self.action = self.value_calc(state)
-        # self.action = 0
         self.actions.append(self.action)
 
+        action = self.action_selection()
+
+
         # Reward
-        reward = self.reward(state, ghost_dist)
+        reward = self.reward(ghost_dist)
         self.rewards.append(reward)
         
         return action
+    
+    def direction(self, x, y):
+        
+        if(x != 0):
+            if(x > 0):
+                action = 2 # right
+            else: 
+                action = 3 # left
+        
+        elif(y !=0):
+            if(y > 0):
+                action = 4 # down
+            else: 
+                action = 1 # up
+        return action
 
     def action_selection(self):
-        # pacman_y = state[0]
-        # pacman_x = state[1]   
-
+                
         if(self.action == 0):
             # collect pills
             route = self.bfs("pill", self.graph, (self.pacman_y, self.pacman_x))
             
-            
             if(len(route) != 1):
                 direction = route[1]
          
@@ -198,49 +239,33 @@ class MonteCarlo:
             else:
                 x = 1
                 y = 1
-            
-            
-            if(x != 0):
-                if(x > 0):
-                    action = 2 # right
-                else: 
-                    action = 3 # left
-            
-            elif(y !=0):
-                if(y > 0):
-                    action = 4 # down
-                else: 
-                    action = 1 # up
-        
+
+            action = self.direction(x, y)
+                    
         elif(self.action == 1):
             # run from ghosts    
+            route = self.bfs("ghost", self.graph, (self.pacman_y, self.pacman_x))            
+            directions = []
             
-            route = self.bfs("ghost", self.graph, (self.pacman_y, self.pacman_x))
+            for i in self.graph[(self.pacman_y, self.pacman_x)]:
+                directions.append(i)
+            
+            if(len(directions) != 1):
+                directions.remove(route[1])      
+                                    
             if(len(route) != 1):
-                direction = route[1]
-         
+                direction = directions[0]
+
                 y = direction[0] - self.pacman_y
                 x = direction[1] - self.pacman_x
             else:
                 x = 1
                 y = 1
-            
-            if(x != 0):
-                if(x > 0):
-                    action = 3 # left
-                else: 
-                    action = 2 # right
-            
-            elif(y !=0):
-                if(y > 0):
-                    action = 1 # up
-                else: 
-                    action = 4 # down
-            
-            # action = 1
         
+            action = self.direction(x, y)
+                        
         elif(self.action == 2):
-            # chase ghosts 
+            # Chase ghosts 
             route = self.bfs("ghost", self.graph, (self.pacman_y, self.pacman_x))
             if(len(route) != 1):
                 direction = route[1]
@@ -250,19 +275,9 @@ class MonteCarlo:
             else:
                 x = 1
                 y = 1
-            
-            if(x != 0):
-                if(x > 0):
-                    action = 2 # right
-                else: 
-                    action = 3 # left
-            
-            elif(y !=0):
-                if(y > 0):
-                    action = 4 # down
-                else: 
-                    action = 1 # up
-            
+
+            action = self.direction(x, y)
+                        
         return action
     
     def setCoordinates(self, observation):
@@ -296,25 +311,27 @@ class MonteCarlo:
         for n in range(epochs):
             
             self.env.reset()
-            
+            self.pillMap = self.pillMapGen()
+
             # 1) modify parameters
             self.states = []
             self.actions = []
             self.rewards = []
-
-            self.counter = 1
                         
             # 3) run simulation
             for j in range(self.steps):
+                self.ghostMapReset()
+
                 self.pillMap[self.pacman_y][self.pacman_x] = 0
                 
                 action = self.state_machine()
                 # print(action)
+                # self.current_action = self.state_machine()
 
                 # observation, reward, terminated, truncated, info = self.env.step(self.current_action)
                 observation, reward, terminated, truncated, info = self.env.step(action)
                 self.setCoordinates(observation)
-                
+                self.lives = observation[123]
                 
                 self.score = reward
                 
@@ -326,11 +343,12 @@ class MonteCarlo:
 
             # 4) measure change in quality
             total_new_rewardsblip = np.sum(rewards)
-            print(n, total_new_rewardsblip,self.counter)
+            print(n, total_new_rewardsblip)
             total_rewards.append(total_new_rewardsblip)
 
             G = 0
-            # 5) update parameters according to algorithm
+            
+            # This function was used in a prior piece of work for MLiS part 1 
             for i in reversed(range(len(actions))):
                 k = len(actions)-1
                 total_new_rewardsblip
@@ -343,12 +361,124 @@ class MonteCarlo:
 
                 Q[states[k-i][0]][states[k-i][1]][states[k-i][2]][states[k-i][3]][actions[k-i]] = average_returns[states[k-i][0]][states[k-i][1]][states[k-i][2]][states[k-i][3]][actions[k-i]] / average_returns_count[states[k-i][0]][states[k-i][1]][states[k-i][2]][states[k-i][3]][actions[k-i]]
 
-
                 self.value_function[states[k-i][0]][states[k-i][1]][states[k-i][2]][states[k-i][3]][actions[k-i]] = Q[states[k-i][0]][states[k-i][1]][states[k-i][2]][states[k-i][3]][actions[k-i]]
 
         pass
-        
+    
+    def run(self, env):
+        env.reset()
+        self.pillMap = self.pillMapGen()
+        rewardSum = 0
+        graphScore = []
+        # movement starts at 66 frames
+        for i in range(20000):
+            self.ghostMapReset()
 
+            self.pillMap[self.pacman_y][self.pacman_x] = 0
+            action = self.state_machine()
+            print(self.action)
+
+            observation, reward, terminated, truncated, info = env.step(action)
+            self.setCoordinates(observation)
+            self.lives = observation[123]
+            
+            self.score = reward
+            
+            
+            rewardSum += reward
+            
+            graphScore.append(rewardSum)
+            
+            if terminated or truncated:
+                observation, info = env.reset()
+                print("Survived: " + str(i))
+                break            
+
+        env.close()
+        
+        df = pd.DataFrame(graphScore)
+        df.to_csv("MCScore.csv", index=False)
+        # graphScore = pd.read_csv("MCScore.csv")
+
+        # plt.figure()
+        # plt.plot(graphScore, label="Score at each time step", alpha=1)
+        # plt.xlabel("Time Step")
+        # plt.ylabel("Score")
+        # plt.show()
+        
+        
+    def runPillCollect(self, env):
+        env.reset()
+        self.pillMap = self.pillMapGen()
+        rewardSum = 0
+        graphScore = []
+        # movement starts at 66 frames
+        for i in range(20000):
+            self.ghostMapReset()
+
+            self.pillMap[self.pacman_y][self.pacman_x] = 0
+            self.action = 0
+            action = self.action_selection()
+            # print(self.action)
+
+            observation, reward, terminated, truncated, info = env.step(action)
+            self.setCoordinates(observation)
+            self.lives = observation[123]
+            
+            self.score = reward
+            
+            
+            rewardSum += reward
+            
+            graphScore.append(rewardSum)
+            
+            if terminated or truncated:
+                observation, info = env.reset()
+                print("Survived: " + str(i))
+                break            
+
+        env.close()
+        
+        df = pd.DataFrame(graphScore)
+        df.to_csv("MCPillScore.csv", index=False)
+        
+    def runGhostEvade(self, env):
+        env.reset()
+        self.pillMap = self.pillMapGen()
+        rewardSum = 0
+        graphScore = []
+        # movement starts at 66 frames
+        for i in range(20000):
+            self.ghostMapReset()
+
+            self.pillMap[self.pacman_y][self.pacman_x] = 0
+            self.action = 1
+            action = self.action_selection()
+            # print(self.action)
+
+            observation, reward, terminated, truncated, info = env.step(action)
+            self.setCoordinates(observation)
+            self.lives = observation[123]
+            
+            self.score = reward
+            
+            
+            rewardSum += reward
+            
+            graphScore.append(rewardSum)
+            
+            if terminated or truncated:
+                observation, info = env.reset()
+                print("Survived: " + str(i))    
+                break            
+
+        env.close()
+        
+        df = pd.DataFrame(graphScore)
+        df.to_csv("MCGhostScore.csv", index=False)
+
+        
+    # This function was used in a prior piece of work for MLiS part 1 
     def load(self):
         try:
             parameter_array = np.load('pacman_controller_parameters.npy')
@@ -356,7 +486,8 @@ class MonteCarlo:
             print((parameter_array[0]))
         except:
             print("Could not load parameters, sticking with default parameters.")
-
+            
+    # This function was used in a prior piece of work for MLiS part 1 
     def save(self):
         parameter_array = np.array([self.value_function])
         np.save('pacman_controller_parameters.npy', parameter_array)

@@ -30,7 +30,6 @@ class Brain:
             rng = random.random()
             
             if (rng < mutationRate):
-                # random direction  
                 self.actions[i] = random.randint(0, 4)
                 
     def loadBrain(self, actions):

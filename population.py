@@ -65,7 +65,7 @@ class Population:
             
         return self.agents[0]
     
-    def bestAgent(self) -> int:
+    def bestAgent(self):
         best = 0
         bestAgentIndex = 0
         
