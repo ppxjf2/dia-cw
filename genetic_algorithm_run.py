@@ -73,7 +73,7 @@ def train():
         np.savetxt("generations/generation_" + str(i+1) + ".txt", agents, fmt="%d")
         
         test.naturalSelection(pop)
-        test.mutateChildren()
+        test.mutateChild()
         test.runGeneration()
 
         bestAgentIndex = test.bestAgent()

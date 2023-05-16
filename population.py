@@ -115,7 +115,7 @@ class Population:
     
         self.agents = children
     
-    def mutateChildren(self):
+    def mutateChild(self):
         for i in range(1, len(self.agents)):
             self.agents[i].brain.mutate()
     
