@@ -7,7 +7,6 @@ import math
 from monte_carlo import MonteCarlo
 
 env = gym.make("MsPacman-ramDeterministic-v4", render_mode="rgb_array", obs_type="ram")
-
 env.reset()
 
 action = np.loadtxt("best_brain.txt", dtype="uint8", delimiter=' ')
@@ -17,6 +16,7 @@ lastObservation = []
 
 test = MonteCarlo(env)
 
+# uncomment to train new Monte-Carlo
 # test.train(1000)
 # test.save()
 
