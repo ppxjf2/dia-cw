@@ -376,7 +376,7 @@ class MonteCarlo:
 
             self.pillMap[self.pacman_y][self.pacman_x] = 0
             action = self.state_machine()
-            print(self.action)
+            # print(self.action)
 
             observation, reward, terminated, truncated, info = env.step(action)
             self.setCoordinates(observation)
@@ -397,15 +397,7 @@ class MonteCarlo:
         env.close()
         
         df = pd.DataFrame(graphScore)
-        df.to_csv("MCScore.csv", index=False)
-        # graphScore = pd.read_csv("MCScore.csv")
-
-        # plt.figure()
-        # plt.plot(graphScore, label="Score at each time step", alpha=1)
-        # plt.xlabel("Time Step")
-        # plt.ylabel("Score")
-        # plt.show()
-        
+        df.to_csv("MCScore.csv", index=False)       
         
     def runPillCollect(self, env):
         env.reset()
